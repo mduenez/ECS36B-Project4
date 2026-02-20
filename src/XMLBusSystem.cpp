@@ -41,6 +41,10 @@ struct CXMLBusSystem::SImplementation{
         }
     };
 
+    struct SRoute : public CBusSystem::SRoute{
+        
+    }
+
     bool FindStartTag(std::shared_ptr< CXMLReader > xmlsource, const std::string &starttag){
         SXMLEntity TempEntity;
         while(xmlsource->ReadEntity(TempEntity)){
@@ -83,7 +87,7 @@ struct CXMLBusSystem::SImplementation{
             if(!systemsource->ReadEntity(TempEntity)){
                 return;
             }
-            if((TempEntity.DType == SXMLEntity::EType::StartElement) &&(TempEntity.DNameData == DStopsTag)){
+            if((TempEntity.DType == SXMLEntity::EType::StartElement) &&(TempEntity.DNameData == DStopTag)){
                 ParseStop(systemsource,TempEntity);
             }
 
@@ -92,12 +96,20 @@ struct CXMLBusSystem::SImplementation{
 
     
 
-    void ParseRoute(std::shared_ptr< CXMLReader > systemsource){
+    void ParseRoute(std::shared_ptr< CXMLReader > systemsource){ //called from parse routes, gets all the info for a route and adds it to the system
         
     }
 
-    void ParseRoutes(std::shared_ptr< CXMLReader > systemsource){
-
+    void ParseRoutes(std::shared_ptr< CXMLReader > systemsource){ //get all the routes
+        SXMLEntity TempEntity;
+        do{
+            if(!systemsource->ReadEntity(TempEntity)){
+                return;
+            }
+            if((TempEntity.DType == SXMLEntity::EType::StartElement) &&(TempEntity.DNameData == DRouteTag)){
+                ParseRoute(systemsource);
+            }
+        }while((TempEntity.DType != SXMLEntity::EType::EndElement)||(TempEntity.DNameData != DRoutesTag));
     }
 
 

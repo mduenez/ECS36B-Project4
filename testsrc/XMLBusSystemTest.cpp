@@ -53,3 +53,20 @@ TEST(XMLBusSystemTest, EmptyTest){
     EXPECT_EQ(BusSystem.StopByIndex(0),nullptr);
     EXPECT_EQ(BusSystem.StopByID(1),nullptr);
 }
+
+TEST(XMLBusSystemTest, InvalidTest){ //asks for 100th stop and route, which do not exist
+    auto BusRouteSource = std::make_shared<CStringDataSource>(  "<bussystem>\n"
+                                                                "<stops>\n"
+                                                                "</stops>\n"
+                                                                "</bussystem>");
+    auto BusRouteReader = std::make_shared< CXMLReader >(BusRouteSource);
+    auto BusPathSource = std::make_shared<CStringDataSource>(  "<paths>\n"
+                                                                "</paths>");
+    auto BusPathReader = std::make_shared< CXMLReader >(BusPathSource);
+    CXMLBusSystem BusSystem(BusRouteReader,BusPathReader);
+
+    EXPECT_EQ(BusSystem.StopByIndex(10),nullptr);
+    EXPECT_EQ(BusSystem.StopByID(100),nullptr);
+    EXPECT_EQ(BusSystem.RouteByIndex(100),nullptr);
+    EXPECT_EQ(BusSystem.PathByStopIDs(100,100),nullptr);
+}
