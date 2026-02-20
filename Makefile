@@ -13,6 +13,7 @@ LIB_DIR				= ./lib
 TESTOBJ_DIR			= ./testobj
 TESTBIN_DIR			= ./testbin
 TESTCOVER_DIR		= ./htmlconv
+<<<<<<< HEAD
 
 # Define the flags for compilation/linking
 DEFINES				=
@@ -79,6 +80,7 @@ $(TEST_TARGET): $(TEST_OBJ_FILES)
 $(TEST_SVG_OBJ): $(SRC_DIR)/svg.c
 	$(CC) $(TEST_CFLAGS) $(DEFINES) $(INCLUDE) -c $(SRC_DIR)/svg.c -o $(TEST_SVG_OBJ)
 
+<<<<<<< HEAD
 $(TEST_SVG_TEST_OBJ): $(TESTSRC_DIR)/SVGTest.cpp
 	$(CXX) $(TEST_CFLAGS) $(TEST_CPPFLAGS) $(DEFINES) $(INCLUDE) -c $(TESTSRC_DIR)/SVGTest.cpp -o $(TEST_SVG_TEST_OBJ)
 
@@ -123,6 +125,7 @@ $(TESTOBJ_DIR)/StringDataSource.o: $(SRC_DIR)/StringDataSource.cpp
 
 $(TEST_XML_TARGET): $(TEST_XML_OBJ) $(TEST_XML_TEST_OBJ) $(TEST_STRSRC_OBJ)
 	$(CXX) $(TEST_CFLAGS) $(TEST_CPPFLAGS) $^ $(TEST_LDFLAGS) -o $@
+
 directories:
 	mkdir -p $(BIN_DIR)
 	mkdir -p $(OBJ_DIR)

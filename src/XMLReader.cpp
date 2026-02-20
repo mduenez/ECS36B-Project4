@@ -78,11 +78,13 @@ struct CXMLReader::SImplementation{
 
 CXMLReader::CXMLReader(std::shared_ptr< CDataSource > src){
     DImplementation = std::make_unique<SImplementation>(src);
+
 }
 
 CXMLReader::~CXMLReader() = default;
 
 bool CXMLReader::End() const{
+<<<<<<< HEAD
     return DImplementation->DEnd &&
            DImplementation->DQueue.empty();
 }
