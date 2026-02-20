@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define SVG_OK 0
-
 /**
  * @brief Opaque SVG drawing context.
  *
@@ -53,7 +51,7 @@ svg_return_t svg_circle(svg_context_ptr context,
                         const svg_point_t *center,
                         svg_real_t radius,
                         const char *style){
-    return SVG_OK;
+    return 0;
 }
 
 
@@ -61,21 +59,22 @@ svg_return_t svg_rect(svg_context_ptr context,
                       const svg_point_t *top_left,
                       const svg_size_t *size,
                       const char* style){
-    return SVG_OK;
+    return 0;
 }
 
 svg_return_t svg_line(svg_context_ptr context,
                       const svg_point_t *start,
                       const svg_point_t *end,
                       const char* style){
-    return SVG_OK;
+    return 0;
 }
 
 svg_return_t svg_group_begin(svg_context_ptr context, 
                              const char* attrs){
-<<<<<<< HEAD
-    return SVG_OK;
+
+    return 0;
 }
 
 svg_return_t svg_group_end(svg_context_ptr context){
-    return SVG_OK;
+    return 0;
+}

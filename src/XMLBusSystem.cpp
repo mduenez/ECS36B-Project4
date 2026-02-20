@@ -208,4 +208,3 @@ std::shared_ptr<CBusSystem::SRoute> CXMLBusSystem::RouteByName(const std::string
 std::shared_ptr<CBusSystem::SPath> CXMLBusSystem::PathByStopIDs(TStopID start, TStopID end) const noexcept{
 
 }
->>>>>>> main
