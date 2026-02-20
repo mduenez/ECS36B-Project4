@@ -69,4 +69,6 @@ TEST(XMLBusSystemTest, InvalidTest){ //asks for 100th stop and route, which do n
     EXPECT_EQ(BusSystem.StopByID(100),nullptr);
     EXPECT_EQ(BusSystem.RouteByIndex(100),nullptr);
     EXPECT_EQ(BusSystem.PathByStopIDs(100,100),nullptr);
+
 }
+

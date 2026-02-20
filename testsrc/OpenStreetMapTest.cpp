@@ -70,3 +70,4 @@ TEST(OpenStreetMapTest, WayNodeTest){
     EXPECT_EQ(Way->GetNodeID(1), 20);
     EXPECT_EQ(Way->GetNodeID(2), 30);
 }
+
