@@ -1,42 +1,29 @@
 #ifndef SVGWRITER_H
 #define SVGWRITER_H
 
-#include <memory>
+#include <string>
 #include <vector>
-#include "DataSink.h"
-#include "XMLEntity.h"
+#include <memory>
+#include <unordered_map>
 
-typedef int TSVGPixel;
-typedef double TSVGReal;
-typedef TSVGReal TSVGCoordinate;
-
-struct SSVGPoint{
-    TSVGCoordinate DX;
-    TSVGCoordinate DY;
+struct SVGPoint {
+    double x;
+    double y;
 };
 
-struct SSVGSize{
-    TSVGReal DWidth;
-    TSVGReal DHeight;
+using TAttributes = std::unordered_map<std::string, std::string>;
+using TSVGReal = double;
+
+class SVGWriter {
+public:
+    SVGWriter() = default;
+    virtual ~SVGWriter() = default;
+
+    virtual bool Circle(const SVGPoint &center, TSVGReal radius, const TAttributes &style) = 0;
+    virtual bool Line(const SVGPoint &start, const SVGPoint &end, const TAttributes &style) = 0;
+    virtual bool Text(const SVGPoint &pos, const std::string &text, const TAttributes &style) = 0;
+    virtual bool Rect(const SVGPoint &topleft, const SVGPoint &size, const TAttributes &style) = 0;
+    virtual bool SimplePath(const std::vector<SVGPoint> &points, const TAttributes &style) = 0;
 };
 
-class CSVGWriter{
-    private:
-        struct SImplementation;
-        std::unique_ptr<SImplementation> DImplementation;
-        
-    public:
-        CSVGWriter(std::shared_ptr< CDataSink > sink, TSVGPixel width, TSVGPixel height);
-        ~CSVGWriter();
-        
-        bool Circle(const SSVGPoint &center, TSVGReal radius, const TAttributes &style);
-        bool Rectange(const SSVGPoint &topleft, const SSVGSize &size, const TAttributes &style);
-        bool Line(const SSVGPoint &start, const SSVGPoint &end, const TAttributes &style);
-        bool SimplePath(const std::vector<SSVGPoint> points, const TAttributes &style);
-        bool GroupBegin(const TAttributes &attrs);
-        bool GroupEnd();
-
-};
-
-#endif
-                                      
+#endif // SVGWRITER_H

@@ -1,1 +1,1 @@
-genhtml ./htmlconv/coverage.info --output-directory htmlcov
+genhtml /coverage.info --output-directory htmlcov

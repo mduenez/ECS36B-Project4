@@ -54,7 +54,7 @@ TEST(XMLBusSystemTest, EmptyTest){
     EXPECT_EQ(BusSystem.StopByID(1),nullptr);
 }
 
-TEST(XMLBusSystemTest, InvalidTest){ //asks for 100th stop and route, which do not exist
+TEST(XMLBusSystemTest, InvalidTest){ 
     auto BusRouteSource = std::make_shared<CStringDataSource>(  "<bussystem>\n"
                                                                 "<stops>\n"
                                                                 "</stops>\n"

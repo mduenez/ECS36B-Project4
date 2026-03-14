@@ -1,24 +1,30 @@
 #ifndef OPENSTREETMAP_H
 #define OPENSTREETMAP_H
 
-#include "XMLReader.h"
 #include "StreetMap.h"
+#include <vector>
+#include <memory>
 
-class COpenStreetMap : public CStreetMap{
-    private:
-        struct SImplementation;
-        std::unique_ptr<SImplementation> DImplementation;
+class OpenStreetMap : public StreetMap {
+public:
+    OpenStreetMap() = default;
+    ~OpenStreetMap() override = default;
 
-    public:
-        COpenStreetMap(std::shared_ptr<CXMLReader> src);
-        ~COpenStreetMap();
+    const std::vector<std::shared_ptr<Node>>& GetNodes() const override {
+        return nodes;
+    }
 
-        std::size_t NodeCount() const noexcept override;
-        std::size_t WayCount() const noexcept override;
-        std::shared_ptr<CStreetMap::SNode> NodeByIndex(std::size_t index) const noexcept override;
-        std::shared_ptr<CStreetMap::SNode> NodeByID(TNodeID id) const noexcept override;
-        std::shared_ptr<CStreetMap::SWay> WayByIndex(std::size_t index) const noexcept override;
-        std::shared_ptr<CStreetMap::SWay> WayByID(TWayID id) const noexcept override;
+    const std::vector<std::shared_ptr<Way>>& GetWays() const override {
+        return ways;
+    }
+
+    // Functions to add nodes and ways
+    void AddNode(std::shared_ptr<Node> node) { nodes.push_back(node); }
+    void AddWay(std::shared_ptr<Way> way) { ways.push_back(way); }
+
+private:
+    std::vector<std::shared_ptr<Node>> nodes;
+    std::vector<std::shared_ptr<Way>> ways;
 };
 
-#endif
+#endif // OPENSTREETMAP_H

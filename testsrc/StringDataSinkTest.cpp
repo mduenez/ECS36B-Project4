@@ -1,32 +1,45 @@
 #include <gtest/gtest.h>
 #include "StringDataSink.h"
+#include <vector>
 
-TEST(StringDataSink, EmptyTest){
-    CStringDataSink EmptySink;
+// -------------------- EmptyTest --------------------
+TEST(StringDataSink, EmptyTest) {
+    CStringDataSink sink;
     
-    EXPECT_TRUE(EmptySink.String().empty());
-    EXPECT_EQ(EmptySink.String(),"");
+    EXPECT_TRUE(sink.String().empty());
+    EXPECT_EQ(sink.String(), "");
 }
 
-TEST(StringDataSink, PutTest){
-    CStringDataSink Sink;
+// -------------------- PutTest --------------------
+TEST(StringDataSink, PutTest) {
+    CStringDataSink sink;
     
-    EXPECT_TRUE(Sink.Put('H'));
-    EXPECT_TRUE(Sink.Put('e'));
-    EXPECT_TRUE(Sink.Put('l'));
-    EXPECT_TRUE(Sink.Put('l'));
-    EXPECT_EQ(Sink.String(),"Hell");
-    EXPECT_TRUE(Sink.Put('o'));
-    EXPECT_EQ(Sink.String(),"Hello");
+    EXPECT_TRUE(sink.Put('H'));
+    EXPECT_TRUE(sink.Put('e'));
+    EXPECT_TRUE(sink.Put('l'));
+    EXPECT_TRUE(sink.Put('l'));
+    EXPECT_EQ(sink.String(), "Hell");
+
+    EXPECT_TRUE(sink.Put('o'));
+    EXPECT_EQ(sink.String(), "Hello");
 }
 
-TEST(StringDataSink, WriteTest){
-    std::vector<char> TempVector1 = {'H','e','l','l','o'};
-    std::vector<char> TempVector2 = {' ','W','o','r','l','d'};
-    CStringDataSink Sink;
+// -------------------- WriteTest --------------------
+TEST(StringDataSink, WriteTest) {
+    std::vector<char> temp1 = {'H','e','l','l','o'};
+    std::vector<char> temp2 = {' ','W','o','r','l','d'};
+    CStringDataSink sink;
 
-    EXPECT_TRUE(Sink.Write(TempVector1));
-    EXPECT_EQ(Sink.String(),"Hello");
-    EXPECT_TRUE(Sink.Write(TempVector2));
-    EXPECT_EQ(Sink.String(),"Hello World");   
+    // Write first vector
+    EXPECT_TRUE(sink.Write(temp1));
+    EXPECT_EQ(sink.String(), "Hello");
+
+    // Write second vector
+    EXPECT_TRUE(sink.Write(temp2));
+    EXPECT_EQ(sink.String(), "Hello World");
+
+    // Write empty vector (edge case)
+    std::vector<char> emptyVec;
+    EXPECT_TRUE(sink.Write(emptyVec));
+    EXPECT_EQ(sink.String(), "Hello World"); // string should remain unchanged
 }

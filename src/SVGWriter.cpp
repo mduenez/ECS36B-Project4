@@ -1,96 +1,33 @@
 #include "SVGWriter.h"
-#include "svg.h"
-#include <string>
-#include <vector>
 #include <iostream>
 
-using std::cout;
-using std::endl;
+class CSVGWriter : public SVGWriter {
+public:
+    CSVGWriter() = default;
+    ~CSVGWriter() override = default;
 
-struct CSVGWriter::SImplementation{
-    std::shared_ptr< CDataSink > DSink;
-    svg_context_ptr DContext;
-
-    static svg_return_t WriteFunction(svg_user_context_ptr user, const char *text){
-        SImplementation *Implementation = (SImplementation *)user;
-        while(*text){
-            Implementation->DSink->Put(*text);
-            text++;
-        }
-        return SVG_OK;   
+    bool Circle(const SVGPoint &center, TSVGReal radius, const TAttributes &style) override {
+        std::cout << "Circle at (" << center.x << "," << center.y << ") radius " << radius << "\n";
+        return true;
     }
 
-
-    SImplementation(std::shared_ptr< CDataSink > sink, TSVGPixel width, TSVGPixel height){
-        DSink = sink;
-        DContext = svg_create(WriteFunction,nullptr,this,width,height);
+    bool Line(const SVGPoint &start, const SVGPoint &end, const TAttributes &style) override {
+        std::cout << "Line from (" << start.x << "," << start.y << ") to (" << end.x << "," << end.y << ")\n";
+        return true;
     }
 
-    ~SImplementation(){
-        svg_destroy(DContext);
+    bool Text(const SVGPoint &pos, const std::string &text, const TAttributes &style) override {
+        std::cout << "Text '" << text << "' at (" << pos.x << "," << pos.y << ")\n";
+        return true;
     }
 
-    std::string CreateStyleString(const TAttributes &style){
-
-        return "";
+    bool Rect(const SVGPoint &topleft, const SVGPoint &size, const TAttributes &style) override {
+        std::cout << "Rect at (" << topleft.x << "," << topleft.y << ") size (" << size.x << "," << size.y << ")\n";
+        return true;
     }
 
-    bool Circle(const SSVGPoint &center, TSVGReal radius, const TAttributes &style){
-        svg_point_t Center{center.DX,center.DY};
-        std::string Style = CreateStyleString(style);
-        return svg_circle(DContext,&Center,radius,Style.c_str());
+    bool SimplePath(const std::vector<SVGPoint> &points, const TAttributes &style) override {
+        std::cout << "Path with " << points.size() << " points\n";
+        return true;
     }
-
-    bool Rectange(const SSVGPoint &topleft, const SSVGSize &size, const TAttributes &style){
-
-    }
-
-    bool Line(const SSVGPoint &start, const SSVGPoint &end, const TAttributes &style){
-
-    }
-
-    bool SimplePath(const std::vector<SSVGPoint> points, const TAttributes &style){
-
-    }
-
-    bool GroupBegin(const TAttributes &attrs){
-
-    }
-
-    bool GroupEnd(){
-
-    }
-
 };
-
-CSVGWriter::CSVGWriter(std::shared_ptr< CDataSink > sink, TSVGPixel width, TSVGPixel height){
-    DImplementation = std::make_unique<SImplementation>(sink,width,height);
-}
-
-CSVGWriter::~CSVGWriter(){
-
-}
-
-bool CSVGWriter::Circle(const SSVGPoint &center, TSVGReal radius, const TAttributes &style){
-    return DImplementation->Circle(center, radius,style);
-}
-
-bool CSVGWriter::Rectange(const SSVGPoint &topleft, const SSVGSize &size, const TAttributes &style){
-    return DImplementation->Rectange(topleft,size,style);
-}
-
-bool CSVGWriter::Line(const SSVGPoint &start, const SSVGPoint &end, const TAttributes &style){
-
-}
-
-bool CSVGWriter::SimplePath(const std::vector<SSVGPoint> points, const TAttributes &style){
-
-}
-
-bool CSVGWriter::GroupBegin(const TAttributes &attrs){
-
-}
-
-bool CSVGWriter::GroupEnd(){
-
-}
