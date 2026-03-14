@@ -32,6 +32,7 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+<<<<<<< HEAD
             <td class="headerCovTableEntry">1</td>
             <td class="headerCovTableEntry">1</td>
           </tr>
@@ -43,6 +44,19 @@
             <td class="headerCovTableEntryLo">50.0&nbsp;%</td>
             <td class="headerCovTableEntry">2</td>
             <td class="headerCovTableEntry">1</td>
+=======
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">2</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2026-03-13 10:42:11</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryLo">50.0&nbsp;%</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">2</td>
+>>>>>>> main
           </tr>
                   <tr><td><img src="../glass.png" width=3 height=3 alt=""></td></tr>
                 </table>
@@ -72,7 +86,11 @@
 <span id="L10"><span class="lineNum">      10</span>              :         inline static constexpr TStopID InvalidStopID = std::numeric_limits&lt;TStopID&gt;::max();</span>
 <span id="L11"><span class="lineNum">      11</span>              : </span>
 <span id="L12"><span class="lineNum">      12</span>              :         struct SStop{</span>
+<<<<<<< HEAD
 <span id="L13"><span class="lineNum">      13</span>              :             virtual ~SStop(){};</span>
+=======
+<span id="L13"><span class="lineNum">      13</span> <span class="tlaGNC tlaBgGNC">           2 :             virtual ~SStop(){};</span></span>
+>>>>>>> main
 <span id="L14"><span class="lineNum">      14</span>              :             virtual TStopID ID() const noexcept = 0;</span>
 <span id="L15"><span class="lineNum">      15</span>              :             virtual CStreetMap::TNodeID NodeID() const noexcept = 0;</span>
 <span id="L16"><span class="lineNum">      16</span>              :             virtual std::string Description() const noexcept = 0;</span>
@@ -94,7 +112,11 @@
 <span id="L32"><span class="lineNum">      32</span>              :             virtual CStreetMap::TNodeID GetNodeID(std::size_t index) const noexcept = 0;</span>
 <span id="L33"><span class="lineNum">      33</span>              :         };</span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
+<<<<<<< HEAD
 <span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC tlaBgGNC">           1 :         virtual ~CBusSystem(){};</span></span>
+=======
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">           3 :         virtual ~CBusSystem(){};</span></span>
+>>>>>>> main
 <span id="L36"><span class="lineNum">      36</span>              : </span>
 <span id="L37"><span class="lineNum">      37</span>              :         virtual std::size_t StopCount() const noexcept = 0;</span>
 <span id="L38"><span class="lineNum">      38</span>              :         virtual std::size_t RouteCount() const noexcept = 0;</span>

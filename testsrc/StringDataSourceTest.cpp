@@ -1,83 +1,97 @@
 #include <gtest/gtest.h>
 #include "StringDataSource.h"
+#include <vector>
 
-TEST(StringDataSource, EndTest){
-    CStringDataSource EmptySource("");
-    CStringDataSource BaseSource("Hello");
+// -------------------- EndTest --------------------
+TEST(StringDataSource, EndTest) {
+    CStringDataSource emptySource("");
+    CStringDataSource baseSource("Hello");
 
-    EXPECT_TRUE(EmptySource.End());
-    EXPECT_FALSE(BaseSource.End());
+    EXPECT_TRUE(emptySource.End());
+    EXPECT_FALSE(baseSource.End());
 }
 
-TEST(StringDataSource, PeekTest){
-    CStringDataSource EmptySource("");
-    CStringDataSource Source1("Hello");
-    CStringDataSource Source2("Bye");
-    char TempCh = 'x';
+// -------------------- PeekTest --------------------
+TEST(StringDataSource, PeekTest) {
+    CStringDataSource emptySource("");
+    CStringDataSource source1("Hello");
+    CStringDataSource source2("Bye");
 
-    EXPECT_FALSE(EmptySource.Peek(TempCh));
-    EXPECT_EQ(TempCh,'x');
-    EXPECT_TRUE(Source1.Peek(TempCh));
-    EXPECT_EQ(TempCh,'H');
-    TempCh = 'x';
-    EXPECT_TRUE(Source1.Peek(TempCh));
-    EXPECT_EQ(TempCh,'H');
-    EXPECT_TRUE(Source2.Peek(TempCh));
-    EXPECT_EQ(TempCh,'B');
-    TempCh = 'x';
-    EXPECT_TRUE(Source2.Peek(TempCh));
-    EXPECT_EQ(TempCh,'B');
+    char ch = 'x';
+
+    // Empty source should fail
+    EXPECT_FALSE(emptySource.Peek(ch));
+    EXPECT_EQ(ch, 'x');
+
+    // Non-empty sources
+    EXPECT_TRUE(source1.Peek(ch));
+    EXPECT_EQ(ch, 'H');
+
+    EXPECT_TRUE(source2.Peek(ch));
+    EXPECT_EQ(ch, 'B');
 }
 
-TEST(StringDataSource, GetTest){
-    CStringDataSource EmptySource("");
-    CStringDataSource Source1("Hello");
-    CStringDataSource Source2("Bye");
-    char TempCh = 'x';
+// -------------------- GetTest --------------------
+TEST(StringDataSource, GetTest) {
+    CStringDataSource emptySource("");
+    CStringDataSource source1("Hello");
+    CStringDataSource source2("Bye");
 
-    EXPECT_FALSE(EmptySource.Get(TempCh));
-    EXPECT_EQ(TempCh,'x');
-    EXPECT_TRUE(Source1.Get(TempCh));
-    EXPECT_EQ(TempCh,'H');
-    TempCh = 'x';
-    EXPECT_TRUE(Source1.Peek(TempCh));
-    EXPECT_EQ(TempCh,'e');
-    TempCh = 'x';
-    EXPECT_TRUE(Source1.Peek(TempCh));
-    EXPECT_EQ(TempCh,'e');
-    EXPECT_TRUE(Source2.Get(TempCh));
-    EXPECT_EQ(TempCh,'B');
-    TempCh = 'x';
-    EXPECT_TRUE(Source2.Peek(TempCh));
-    EXPECT_EQ(TempCh,'y');
-    TempCh = 'x';
-    EXPECT_TRUE(Source2.Peek(TempCh));
-    EXPECT_EQ(TempCh,'y');
+    char ch = 'x';
+
+    // Empty source
+    EXPECT_FALSE(emptySource.Get(ch));
+    EXPECT_EQ(ch, 'x');
+
+    // Get from source1
+    EXPECT_TRUE(source1.Get(ch));
+    EXPECT_EQ(ch, 'H');
+    EXPECT_TRUE(source1.Peek(ch));
+    EXPECT_EQ(ch, 'e');
+
+    // Get from source2
+    EXPECT_TRUE(source2.Get(ch));
+    EXPECT_EQ(ch, 'B');
+    EXPECT_TRUE(source2.Peek(ch));
+    EXPECT_EQ(ch, 'y');
 }
 
-TEST(StringDataSource, ReadTest){
-    CStringDataSource EmptySource("");
-    CStringDataSource Source1("Hello");
-    CStringDataSource Source2("Bye");
-    std::vector< char > TempVector;
-    char TempCh = 'x';
+// -------------------- ReadTest --------------------
+TEST(StringDataSource, ReadTest) {
+    CStringDataSource emptySource("");
+    CStringDataSource source1("Hello");
+    CStringDataSource source2("Bye");
 
-    EXPECT_FALSE(EmptySource.Read(TempVector,3));
-    EXPECT_EQ(TempVector.size(),0);
-    EXPECT_TRUE(Source1.Read(TempVector,4));
-    ASSERT_TRUE(TempVector.size() >= 4);
-    EXPECT_EQ(TempVector[0],'H');
-    EXPECT_EQ(TempVector[1],'e');
-    EXPECT_EQ(TempVector[2],'l');
-    EXPECT_EQ(TempVector[3],'l');
-    EXPECT_TRUE(Source1.Peek(TempCh));
-    EXPECT_EQ(TempCh,'o');
-    EXPECT_TRUE(Source2.Read(TempVector,4));
-    ASSERT_TRUE(TempVector.size() >= 3);
-    EXPECT_EQ(TempVector[0],'B');
-    EXPECT_EQ(TempVector[1],'y');
-    EXPECT_EQ(TempVector[2],'e');
-    TempCh = 'x';
-    EXPECT_FALSE(Source2.Peek(TempCh));
-    EXPECT_EQ(TempCh,'x');
+    std::vector<char> tempVector;
+    char ch = 'x';
+
+    // Empty source read
+    EXPECT_FALSE(emptySource.Read(tempVector, 3));
+    EXPECT_EQ(tempVector.size(), 0);
+
+    // Read first 4 chars from source1
+    tempVector.clear();
+    EXPECT_TRUE(source1.Read(tempVector, 4));
+    ASSERT_EQ(tempVector.size(), 4);
+    EXPECT_EQ(tempVector[0], 'H');
+    EXPECT_EQ(tempVector[1], 'e');
+    EXPECT_EQ(tempVector[2], 'l');
+    EXPECT_EQ(tempVector[3], 'l');
+
+    // Next char should be 'o'
+    EXPECT_TRUE(source1.Peek(ch));
+    EXPECT_EQ(ch, 'o');
+
+    // Read all chars from source2 ("Bye") with requested size 4
+    tempVector.clear();
+    EXPECT_TRUE(source2.Read(tempVector, 4));
+    ASSERT_EQ(tempVector.size(), 3);
+    EXPECT_EQ(tempVector[0], 'B');
+    EXPECT_EQ(tempVector[1], 'y');
+    EXPECT_EQ(tempVector[2], 'e');
+
+    // Peek after end should fail
+    ch = 'x';
+    EXPECT_FALSE(source2.Peek(ch));
+    EXPECT_EQ(ch, 'x');
 }

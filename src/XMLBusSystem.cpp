@@ -1,210 +1,172 @@
 #include "XMLBusSystem.h"
-#include <vector>
-#include <unordered_map>
+#include "XMLEntity.h"
+#include <memory>
+#include <string>
+#include <iostream>
 
-struct CXMLBusSystem::SImplementation{
-    const std::string DBusSystemTag = "bussystem";
-    const std::string DStopsTag = "stops";
-    const std::string DStopTag = "stop";
-    const std::string DStopIDAttr = "id";
-    const std::string DStopNodeAttr = "node";
-    const std::string DStopDescAttr = "description";
-
-    
-
-    struct SStop : public CBusSystem::SStop{
+struct CXMLBusSystem::SImplementation {
+    // Stop and Route internal structures
+    struct SStop : public CBusSystem::SStop {
         TStopID DID;
         CStreetMap::TNodeID DNodeID;
         std::string DDescription;
 
-        SStop(TStopID id, CStreetMap::TNodeID nodeid, const std::string &description){
-            DID = id;
-            DNodeID = nodeid;
-            DDescription = description;
-        }
-        ~SStop(){};
-        TStopID ID() const noexcept override{
-            return DID;
-        }
+        SStop(TStopID id, CStreetMap::TNodeID nodeId, const std::string &desc)
+            : DID(id), DNodeID(nodeId), DDescription(desc) {}
 
-        CStreetMap::TNodeID NodeID() const noexcept override{
-            return DNodeID;
-        }
-
-        std::string Description() const noexcept override{
-            return DDescription;
-        }
-
-        std::string Description(const std::string &description) noexcept override{
-            DDescription = description;
-            return DDescription;
-        }
+        TStopID ID() const noexcept override { return DID; }
+        CStreetMap::TNodeID NodeID() const noexcept override { return DNodeID; }
+        std::string Description() const noexcept override { return DDescription; }
+        std::string Description(const std::string &desc) noexcept override { DDescription = desc; return DDescription; }
     };
 
-    struct SRoute : public CBusSystem::SRoute{
-        
-    }
+    struct SRoute : public CBusSystem::SRoute {
+        std::string DName;
+        std::vector<TStopID> DStopIDs;
 
-    bool FindStartTag(std::shared_ptr< CXMLReader > xmlsource, const std::string &starttag){
-        SXMLEntity TempEntity;
-        while(xmlsource->ReadEntity(TempEntity)){
-            if((TempEntity.DType == SXMLEntity::EType::StartElement)&&(TempEntity.DNameData == starttag)){
-                return true;
-            }
+        std::string Name() const noexcept override { return DName; }
+        const std::vector<TStopID>& StopIDs() const noexcept { return DStopIDs; }
+    };
+
+    std::vector<std::shared_ptr<SStop>> StopsByIndex;
+    std::unordered_map<TStopID, std::shared_ptr<SStop>> StopsByID;
+
+    std::vector<std::shared_ptr<SRoute>> RoutesByIndex;
+    std::unordered_map<std::string, std::shared_ptr<SRoute>> RoutesByName;
+
+    // -------------------------------
+    // Parsing helpers
+    // -------------------------------
+    bool ReadUntilStartTag(std::shared_ptr<CXMLReader> reader, const std::string &tag) {
+        SXMLEntity entity;
+        while (reader->ReadEntity(entity)) {
+            if (entity.DType == SXMLEntity::EType::StartElement && entity.DNameData == tag) return true;
         }
         return false;
     }
 
-    bool FindEndTag(std::shared_ptr< CXMLReader > xmlsource, const std::string &starttag){
-        SXMLEntity TempEntity;
-        while(xmlsource->ReadEntity(TempEntity)){
-            if((TempEntity.DType == SXMLEntity::EType::EndElement)&&(TempEntity.DNameData == starttag)){
-                return true;
-            }
+    bool ReadUntilEndTag(std::shared_ptr<CXMLReader> reader, const std::string &tag) {
+        SXMLEntity entity;
+        while (reader->ReadEntity(entity)) {
+            if (entity.DType == SXMLEntity::EType::EndElement && entity.DNameData == tag) return true;
         }
         return false;
     }
 
-    std::vector<std::shared_ptr<SStop> > DStopsByIndex;
-    std::unordered_map<TStopID,std::shared_ptr<SStop> > DStopsByID;
+    void ParseStop(std::shared_ptr<CXMLReader> reader, const SXMLEntity &entity) {
+        TStopID stopId = std::stoull(entity.AttributeValue("id"));
+        CStreetMap::TNodeID nodeId = std::stoull(entity.AttributeValue("node"));
+        std::string desc = entity.AttributeValue("description");
 
-    std::vector<std::shared_ptr<SRoute> > DRoutesByIndex;
-    std::unordered_map<TRouteID, std::shared_ptr<SRoute> > DRoutesByID
+        auto stop = std::make_shared<SStop>(stopId, nodeId, desc);
+        StopsByIndex.push_back(stop);
+        StopsByID[stopId] = stop;
 
-    void ParseStop(std::shared_ptr< CXMLReader > systemsource, const SXMLEntity &stop){
-        TStopID StopID = std::stoull(stop.AttributeValue(DStopIDAttr));
-        CStreetMap::TNodeID NodeID = std::stoull(stop.AttributeValue(DStopNodeAttr));
-        auto NewStop = std::make_shared<SStop>(StopID, NodeID, stop.AttributeValue(DStopDescAttr));
-        DStopsByIndex.push_back(NewStop);
-        DStopsByID[StopID] = NewStop;
-        FindEndTag(systemsource,DStopTag);
+        ReadUntilEndTag(reader, "stop");
     }
 
-    void ParseStops(std::shared_ptr< CXMLReader > systemsource){
-        SXMLEntity TempEntity;
-
-        do{
-            if(!systemsource->ReadEntity(TempEntity)){
-                return;
+    void ParseStops(std::shared_ptr<CXMLReader> reader) {
+        SXMLEntity entity;
+        while (reader->ReadEntity(entity)) {
+            if (entity.DType == SXMLEntity::EType::StartElement && entity.DNameData == "stop") {
+                ParseStop(reader, entity);
+            } else if (entity.DType == SXMLEntity::EType::EndElement && entity.DNameData == "stops") {
+                break;
             }
-            if((TempEntity.DType == SXMLEntity::EType::StartElement) &&(TempEntity.DNameData == DStopTag)){
-                ParseStop(systemsource,TempEntity);
-            }
-
-        }while((TempEntity.DType != SXMLEntity::EType::EndElement)||(TempEntity.DNameData != DStopsTag));
-    }
-
-    
-
-    void ParseRoute(std::shared_ptr< CXMLReader > systemsource){ //called from parse routes, gets all the info for a route and adds it to the system
-        
-    }
-
-    void ParseRoutes(std::shared_ptr< CXMLReader > systemsource){ //get all the routes
-        SXMLEntity TempEntity;
-        do{
-            if(!systemsource->ReadEntity(TempEntity)){
-                return;
-            }
-            if((TempEntity.DType == SXMLEntity::EType::StartElement) &&(TempEntity.DNameData == DRouteTag)){
-                ParseRoute(systemsource);
-            }
-        }while((TempEntity.DType != SXMLEntity::EType::EndElement)||(TempEntity.DNameData != DRoutesTag));
-    }
-
-
-
-    
-
-    void ParseBusSystem(std::shared_ptr< CXMLReader > systemsource){
-        SXMLEntity TempEntity;
-        if(!FindStartTag(systemsource,DBusSystemTag)){
-            return;
         }
-        if(!FindStartTag(systemsource,DStopsTag)){
-            return;
+    }
+
+    void ParseRoute(std::shared_ptr<CXMLReader> reader, const SXMLEntity &entity) {
+        auto route = std::make_shared<SRoute>();
+        route->DName = entity.AttributeValue("name");
+
+        SXMLEntity child;
+        while (reader->ReadEntity(child)) {
+            if (child.DType == SXMLEntity::EType::StartElement && child.DNameData == "stop") {
+                route->DStopIDs.push_back(std::stoull(child.AttributeValue("ref")));
+            } else if (child.DType == SXMLEntity::EType::EndElement && child.DNameData == "route") {
+                break;
+            }
         }
-        ParseStops(systemsource);
 
+        RoutesByIndex.push_back(route);
+        RoutesByName[route->DName] = route;
     }
 
-    SImplementation(std::shared_ptr< CXMLReader > systemsource, std::shared_ptr< CXMLReader > pathsource){
-        ParseBusSystem(systemsource);
-        
-    }
-
-    std::size_t StopCount() const noexcept{
-        return DStopsByIndex.size();
-    }
-
-    std::size_t RouteCount() const noexcept{
-        return DRoutesByIndex.size();
-    }
-    
-    std::shared_ptr<SStop> StopByIndex(std::size_t index) const noexcept{
-        if (index < DStopsByIndex.size()){
-            return DStopsByIndex[index];
+    void ParseRoutes(std::shared_ptr<CXMLReader> reader) {
+        SXMLEntity entity;
+        while (reader->ReadEntity(entity)) {
+            if (entity.DType == SXMLEntity::EType::StartElement && entity.DNameData == "route") {
+                ParseRoute(reader, entity);
+            } else if (entity.DType == SXMLEntity::EType::EndElement && entity.DNameData == "routes") {
+                break;
+            }
         }
+    }
+
+    void ParseBusSystem(std::shared_ptr<CXMLReader> reader) {
+        if (!ReadUntilStartTag(reader, "bussystem")) return;
+        if (!ReadUntilStartTag(reader, "stops")) return;
+        ParseStops(reader);
+
+        if (!ReadUntilStartTag(reader, "routes")) return;
+        ParseRoutes(reader);
+    }
+
+    // -------------------------------
+    // Constructor
+    // -------------------------------
+    SImplementation(std::shared_ptr<CXMLReader> systemSource) {
+        ParseBusSystem(systemSource);
+    }
+
+    // -------------------------------
+    // Accessors
+    // -------------------------------
+    std::size_t StopCount() const noexcept { return StopsByIndex.size(); }
+    std::size_t RouteCount() const noexcept { return RoutesByIndex.size(); }
+
+    std::shared_ptr<SStop> StopByIndex(std::size_t idx) const noexcept {
+        if (idx < StopsByIndex.size()) return StopsByIndex[idx];
         return nullptr;
     }
-    
-    std::shared_ptr<SStop> StopByID(TStopID id) const noexcept{
-        auto it = DStopsByID.find(id);
-        if(it != DStopsByID.end()){
-            return it->second;
-        }
+
+    std::shared_ptr<SStop> StopByID(TStopID id) const noexcept {
+        auto it = StopsByID.find(id);
+        if (it != StopsByID.end()) return it->second;
         return nullptr;
     }
-    
-    std::shared_ptr<SRoute> RouteByIndex(std::size_t index) const noexcept{
-        if (index < DRoutesByIndex.size()){
-            return DRoutesByIndex[index];
-        }
-        return nullptr;       
-    }
-    
-    std::shared_ptr<SRoute> RouteByName(const std::string &name) const noexcept{
 
+    std::shared_ptr<SRoute> RouteByIndex(std::size_t idx) const noexcept {
+        if (idx < RoutesByIndex.size()) return RoutesByIndex[idx];
+        return nullptr;
     }
-    
-    std::shared_ptr<SPath> PathByStopIDs(TStopID start, TStopID end) const noexcept{
-        
+
+    std::shared_ptr<SRoute> RouteByName(const std::string &name) const noexcept {
+        auto it = RoutesByName.find(name);
+        if (it != RoutesByName.end()) return it->second;
+        return nullptr;
     }
-    
+
+    std::shared_ptr<SPath> PathByStopIDs(TStopID start, TStopID end) const noexcept {
+        // Simple placeholder for paths
+        return nullptr;
+    }
 };
 
-CXMLBusSystem::CXMLBusSystem(std::shared_ptr< CXMLReader > systemsource, std::shared_ptr< CXMLReader > pathsource){
-    DImplementation = std::make_unique<SImplementation>(systemsource,pathsource);
-}
-    
-CXMLBusSystem::~CXMLBusSystem(){
-
-}
-    
-std::size_t CXMLBusSystem::StopCount() const noexcept{
-    return DImplementation->StopCount();
-}
-    
-std::size_t CXMLBusSystem::RouteCount() const noexcept{
-    return DImplementation->RouteCount();
+// -------------------------------
+// CXMLBusSystem public API
+// -------------------------------
+CXMLBusSystem::CXMLBusSystem(std::shared_ptr<CXMLReader> systemSource, std::shared_ptr<CXMLReader> pathSource) {
+    DImplementation = std::make_unique<SImplementation>(systemSource);
 }
 
-std::shared_ptr<CBusSystem::SStop> CXMLBusSystem::StopByIndex(std::size_t index) const noexcept{
-    
-}
+CXMLBusSystem::~CXMLBusSystem() = default;
 
-std::shared_ptr<CBusSystem::SStop> CXMLBusSystem::StopByID(TStopID id) const noexcept{
-
-}
-
-std::shared_ptr<CBusSystem::SRoute> CXMLBusSystem::RouteByIndex(std::size_t index) const noexcept{
-
-}
-
-std::shared_ptr<CBusSystem::SRoute> CXMLBusSystem::RouteByName(const std::string &name) const noexcept{
-
-}
-
-std::shared_ptr<CBusSystem::SPath> CXMLBusSystem::PathByStopIDs(TStopID start, TStopID end) const noexcept{
-
-}
+std::size_t CXMLBusSystem::StopCount() const noexcept { return DImplementation->StopCount(); }
+std::size_t CXMLBusSystem::RouteCount() const noexcept { return DImplementation->RouteCount(); }
+std::shared_ptr<CBusSystem::SStop> CXMLBusSystem::StopByIndex(std::size_t idx) const noexcept { return DImplementation->StopByIndex(idx); }
+std::shared_ptr<CBusSystem::SStop> CXMLBusSystem::StopByID(TStopID id) const noexcept { return DImplementation->StopByID(id); }
+std::shared_ptr<CBusSystem::SRoute> CXMLBusSystem::RouteByIndex(std::size_t idx) const noexcept { return DImplementation->RouteByIndex(idx); }
+std::shared_ptr<CBusSystem::SRoute> CXMLBusSystem::RouteByName(const std::string &name) const noexcept { return DImplementation->RouteByName(name); }
+std::shared_ptr<CBusSystem::SPath> CXMLBusSystem::PathByStopIDs(TStopID start, TStopID end) const noexcept { return DImplementation->PathByStopIDs(start, end); }

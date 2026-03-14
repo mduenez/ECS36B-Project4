@@ -1,42 +1,43 @@
-#include "svg.h"
-#include <stdio.h>
+#include "BusSystem.h"
+#include "BusSystemIndexer.h"
+#include "TravelPlan.h"
+#include "HTMLTripPlanWriter.h"
 
-svg_return_t write_fn(svg_user_context_ptr user, const char *text){
-    FILE *fp = (FILE *)user;
-    if(0 >= fprintf(fp,text)){
-        return SVG_ERR_IO;
-    }
-    return SVG_OK;
-}
+#include <memory>
+#include <vector>
+#include <iostream>
 
-svg_return_t cleanup_fn(svg_user_context_ptr user){
-    FILE *fp = (FILE *)user;
-    if(fclose(fp)){
-        return SVG_ERR_IO;
-    }
-    return SVG_OK;
-}
+int main() {
+    auto stop1 = std::make_shared<Stop>(1, "Stop A", 37.7749, -122.4194);
+    auto stop2 = std::make_shared<Stop>(2, "Stop B", 37.7849, -122.4094);
+    auto stop3 = std::make_shared<Stop>(3, "Stop C", 37.7949, -122.3994);
 
-int main(int argc, char *argv[]){
-    FILE *fp = fopen("checkmark.svg","w");
-    svg_point_t center = {50,50};
-    svg_point_t start = {15,55}, middle = {35,75}, end = {80,30};
-    svg_context_ptr context = svg_create(write_fn,cleanup_fn,(svg_user_context_ptr)fp,100,100);
-    svg_return_t return_value = svg_circle(context,&center,45,"fill:none; stroke:green; stroke-width:2");
-    if(return_value){
-        svg_destroy(context);
-        return return_value;
-    }
-    return_value = svg_line(context,&start,&middle,"stroke:green; stroke-width:2");
-    if(return_value){
-        svg_destroy(context);
-        return return_value;
-    }
-    return_value = svg_line(context,&middle,&end,"stroke:green; stroke-width:2");
-    if(return_value){
-        svg_destroy(context);
-        return return_value;
-    }
-    svg_destroy(context);
+    auto route1 = std::make_shared<Route>("Route 1");
+    route1->stops.push_back(stop1);
+    route1->stops.push_back(stop2);
+
+    auto route2 = std::make_shared<Route>("Route 2");
+    route2->stops.push_back(stop2);
+    route2->stops.push_back(stop3);
+
+    auto busSystem = std::make_shared<BusSystem>();
+    busSystem->stops = {stop1, stop2, stop3};
+    busSystem->routes = {route1, route2};
+
+    BusSystemIndexer indexer(busSystem);
+
+    std::cout << "Total stops: " << indexer.StopCount() << "\n";
+    std::cout << "Total routes: " << indexer.RouteCount() << "\n";
+
+    TravelPlan plan;
+    plan.stops = {stop1, stop2};
+    plan.routes = {route1};
+
+    HTMLTripPlanWriter writer("trip_plan.html");
+    writer.Write(plan);
+
+    std::cout << "Trip plan written to trip_plan.html\n";
+
     return 0;
 }
+

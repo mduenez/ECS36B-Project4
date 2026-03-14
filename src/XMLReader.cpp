@@ -14,20 +14,16 @@ struct CXMLReader::SImplementation{
 
         DParser = XML_ParserCreate(nullptr);
         XML_SetUserData(DParser, this);
-        XML_SetElementHandler(DParser,
-                              StartElementHandler,
-                              EndElementHandler);
-        XML_SetCharacterDataHandler(DParser,
-                                    CharacterDataHandler);
+        XML_SetElementHandler(DParser, StartElementHandler, EndElementHandler);
+        XML_SetCharacterDataHandler(DParser, CharacterDataHandler);
     }
 
     ~SImplementation(){
         XML_ParserFree(DParser);
     }
 
-    static void StartElementHandler(void *userData,
-                                    const XML_Char *name,
-                                    const XML_Char **atts){
+    static void StartElementHandler(void *userData, const XML_Char *name, const XML_Char **atts){
+
 
         auto impl = static_cast<SImplementation*>(userData);
 
@@ -41,9 +37,7 @@ struct CXMLReader::SImplementation{
 
         impl->DQueue.push(entity);
     }
-
-    static void EndElementHandler(void *userData,
-                                  const XML_Char *name){
+    static void EndElementHandler(void *userData, const XML_Char *name){
 
         auto impl = static_cast<SImplementation*>(userData);
 
@@ -54,15 +48,12 @@ struct CXMLReader::SImplementation{
         impl->DQueue.push(entity);
     }
 
-    static void CharacterDataHandler(void *userData,
-                                     const XML_Char *s,
-                                     int len){
+    static void CharacterDataHandler(void *userData, const XML_Char *s, int len){
+
 
         auto impl = static_cast<SImplementation*>(userData);
 
         std::string data(s, len);
-
-        // Ignore whitespace-only data
         if(data.find_first_not_of(" \t\n\r") == std::string::npos){
             return;
         }
@@ -77,7 +68,9 @@ struct CXMLReader::SImplementation{
 
 
 CXMLReader::CXMLReader(std::shared_ptr< CDataSource > src){
-    DImplementation = std::make_unique<SImplementation>(src);
+
+    DImplementation = std::make_unique< SImplementation >(src);
+
 }
 
 CXMLReader::~CXMLReader() = default;
@@ -114,8 +107,7 @@ bool CXMLReader::ReadEntity(SXMLEntity &entity, bool skipcdata){
         entity = impl.DQueue.front();
         impl.DQueue.pop();
 
-        if(skipcdata &&
-           entity.DType == SXMLEntity::EType::CharData){
+        if(skipcdata && entity.DType == SXMLEntity::EType::CharData){
             continue;
         }
 
